@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="random_str">A random string</string>
+  <string name="random_str_two">Another random string</string>
+</resources>

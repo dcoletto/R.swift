@@ -37,7 +37,7 @@ struct LocalizableStrings : WhiteListedExtensionsResourceType {
     print("URL: \(url)")
     // If the url is a Localizable try to parse it as XML
     let nsDictionary: NSDictionary
-    if url.absoluteString.hasSuffix("en.lproj/Localizable.strings") {
+    if url.absoluteString.hasSuffix(".lproj/Localizable.strings") {
         let xmlParser = SWXMLHash.config { config in
             /*
              * shouldProcessLazily
@@ -72,8 +72,7 @@ struct LocalizableStrings : WhiteListedExtensionsResourceType {
             config.userInfo = [:]
             config.detectParsingErrors = true
         }
-        let fileAsComment = try String(contentsOf: url)
-        let fileContent = fileAsComment.replacingOccurrences(of: "/*", with: "", options: NSString.CompareOptions.literal, range:nil).replacingOccurrences(of: "*/", with: "", options: NSString.CompareOptions.literal, range:nil).trimmingCharacters(in: .whitespacesAndNewlines)
+        let fileContent = try String(contentsOf: URL(string: "\(url.absoluteString).xml")!)
 
         let parsed = xmlParser.parse(fileContent)
         parsed["resources"]["string"].all.forEach {

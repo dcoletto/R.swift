@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B51C90D208023D80095165C /* Localizable.strings.xml in Resources */ = {isa = PBXBuildFile; fileRef = 5B51C90B208023D80095165C /* Localizable.strings.xml */; };
 		5D1AFAB11C858637003FE7AB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5D1AFAAF1C858637003FE7AB /* Localizable.strings */; };
 		5D9E41341C96918E002172D3 /* StringsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E41331C96918E002172D3 /* StringsTests.swift */; };
 		8A0FBCE6E8FF0950B8821B0B /* Pods_Shared_ResourceApp_tvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF513940333862726B930435 /* Pods_Shared_ResourceApp_tvOS.framework */; };
@@ -111,6 +112,7 @@
 /* Begin PBXFileReference section */
 		22ACD120062243785169391F /* Pods-Shared-ResourceApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shared-ResourceApp.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-Shared-ResourceApp/Pods-Shared-ResourceApp.debug.xcconfig"; sourceTree = "<group>"; };
 		3677277BC1C4F3F77310381B /* Pods-Shared-ResourceApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shared-ResourceApp.release.xcconfig"; path = "../Pods/Target Support Files/Pods-Shared-ResourceApp/Pods-Shared-ResourceApp.release.xcconfig"; sourceTree = "<group>"; };
+		5B51C90C208023D80095165C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = en; path = en.lproj/Localizable.strings.xml; sourceTree = "<group>"; };
 		5D1AFAB01C858637003FE7AB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5D1AFAB21C858647003FE7AB /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5D1AFAB31C85864F003FE7AB /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				E2156B671CC41EB400F341DC /* Generic.strings */,
 				E2762ADF1CCE62CC0009BCAA /* Generic.stringsdict */,
 				5D1AFAAF1C858637003FE7AB /* Localizable.strings */,
+				5B51C90B208023D80095165C /* Localizable.strings.xml */,
 				E2156B651CC4042900F341DC /* Settings.strings */,
 				E2762AC21CCCDFDA0009BCAA /* Settings.stringsdict */,
 			);
@@ -585,6 +588,7 @@
 				TargetAttributes = {
 					D55C6CB71B5D757300301B0D = {
 						CreatedOnToolsVersion = 6.4;
+						DevelopmentTeam = ZW5Y8K7377;
 						LastSwiftMigration = 0900;
 					};
 					D55C6CCE1B5D757300301B0D = {
@@ -648,6 +652,7 @@
 				D5F05D461BB52078003AE55E /* duplicateJson in Resources */,
 				E2156B6C1CC4293000F341DC /* Duplicate#.strings in Resources */,
 				E2156B681CC41EB400F341DC /* Generic.strings in Resources */,
+				5B51C90D208023D80095165C /* Localizable.strings.xml in Resources */,
 				E296935A1CAD64D100401D53 /* associatedtype in Resources */,
 				D51E60C71BB1E600004BB376 /* User@white@3x.png in Resources */,
 				E2CA68DE1EE74585009C4DB4 /* Display P3.clr in Resources */,
@@ -871,7 +876,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$SRCROOT/../build/Debug/rswift\" generate \"--import\" \"SWRevealViewController\" \"$SRCROOT\" > \"$SRCROOT/rswift.log\"";
+			shellScript = "\"$SRCROOT/../rswift\" generate \"--import\" \"SWRevealViewController\" \"$SRCROOT\" > \"$SRCROOT/rswift.log\"";
 		};
 		DEF559A61CA487D6009B8C51 /* R.swift */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -970,6 +975,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		5B51C90B208023D80095165C /* Localizable.strings.xml */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5B51C90C208023D80095165C /* en */,
+			);
+			name = Localizable.strings.xml;
+			sourceTree = "<group>";
+		};
 		5D1AFAAF1C858637003FE7AB /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1158,6 +1171,7 @@
 			baseConfigurationReference = 22ACD120062243785169391F /* Pods-Shared-ResourceApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = ZW5Y8K7377;
 				INFOPLIST_FILE = ResourceApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1172,6 +1186,7 @@
 			baseConfigurationReference = 3677277BC1C4F3F77310381B /* Pods-Shared-ResourceApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = ZW5Y8K7377;
 				INFOPLIST_FILE = ResourceApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
