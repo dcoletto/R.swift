@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import SWXMLHash
 
 struct LocalizableStrings : WhiteListedExtensionsResourceType {
   static let supportedExtensions: Set<String> = ["strings", "stringsdict"]
@@ -33,9 +34,66 @@ struct LocalizableStrings : WhiteListedExtensionsResourceType {
     let locale = Locale(url: url)
 
     // Check to make sure url can be parsed as a dictionary
-    guard let nsDictionary = NSDictionary(contentsOf: url) else {
-      throw ResourceParsingError.parsingFailed("Filename and/or extension could not be parsed from URL: \(url.absoluteString)")
+    print("URL: \(url)")
+    // If the url is a Localizable try to parse it as XML
+    let nsDictionary: NSDictionary
+    if url.absoluteString.hasSuffix("en.lproj/Localizable.strings") {
+        let xmlParser = SWXMLHash.config { config in
+            /*
+             * shouldProcessLazily
+               This determines whether not to use lazy loading of the XML. It can significantly increase the performance of parsing if your XML is large.
+               Defaults to false
+             
+             * shouldProcessNamespaces
+               This setting is forwarded on to the internal NSXMLParser instance. It will return any XML elements without their namespace parts (i.e. "<h:table>" will be returned as "<table>")
+               Defaults to false
+             
+             * caseInsensitive
+               This setting allows for key lookups to be case insensitive. Typically XML is a case sensitive language, but this option lets you bypass this if necessary.
+               Defaults to false
+             
+             * encoding
+               This setting allows for explicitly specifying the character encoding when an XML string is passed to parse.
+               Defaults to String.encoding.utf8
+             
+             * userInfo
+               This setting mimics Codable's userInfo property to allow the user to add contextual information that will be used for deserialization.
+               See Codable's userInfo docs
+               The default is [:]
+             
+             * detectParsingErrors
+               This setting attempts to detect XML parsing errors. parse will return an XMLIndexer.parsingError if any parsing issues are found.
+               Defaults to false (because of backwards compatibility and because many users attempt to parse HTML with this library)
+             */
+            config.shouldProcessLazily = false
+            config.shouldProcessNamespaces = false
+            config.caseInsensitive = false
+            config.encoding = String.Encoding.utf8
+            config.userInfo = [:]
+            config.detectParsingErrors = true
+        }
+        let fileAsComment = try String(contentsOf: url)
+        let fileContent = fileAsComment.replacingOccurrences(of: "/*", with: "", options: NSString.CompareOptions.literal, range:nil).replacingOccurrences(of: "*/", with: "", options: NSString.CompareOptions.literal, range:nil).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let parsed = xmlParser.parse(fileContent)
+        parsed["resources"]["string"].all.forEach {
+            print("\($0.element!.attribute(by: "name")!.text) -> \($0.element!.text)")
+        }
+        
+        nsDictionary = Dictionary(uniqueKeysWithValues:
+            parsed["resources"]["string"].all.map {
+                ($0.element!.attribute(by: "name")!.text, $0.element!.text)
+            }
+        ) as NSDictionary
+    } else {
+        guard let dict = NSDictionary(contentsOf: url) else {
+            throw ResourceParsingError.parsingFailed("Filename and/or extension could not be parsed from URL: \(url.absoluteString)")
+        }
+        nsDictionary = dict
     }
+    
+    print("======== DICT =========")
+    print(nsDictionary)
 
     // Parse dicts from NSDictionary
     let dictionary: [String : (params: [StringParam], commentValue: String)]
