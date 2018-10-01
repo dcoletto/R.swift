@@ -1,6 +1,25 @@
-# R.swift [![Version](https://img.shields.io/cocoapods/v/R.swift.svg?style=flat)](http://cocoapods.org/?q=R.swift) [![License](https://img.shields.io/cocoapods/l/R.swift.svg?style=flat)](blob/master/License) ![Platform](https://img.shields.io/cocoapods/p/R.swift.svg?style=flat) ![Build status](https://www.bitrise.io/app/cef05ad300903a89.svg?token=aPVYvCoJVcdVM-Z6KekYPQ&branch=master)
+# R.swift [![Version](https://img.shields.io/cocoapods/v/R.swift.svg?style=flat)](https://cocoapods.org/pods/R.swift) [![License](https://img.shields.io/cocoapods/l/R.swift.svg?style=flat)](blob/master/License) ![Platform](https://img.shields.io/cocoapods/p/R.swift.svg?style=flat)
 
 _Get strong typed, autocompleted resources like images, fonts and segues in Swift projects_
+
+---
+
+### ⚠️ R.swift and Xcode 10 / Swift 4.2
+The currently latest release of R.swift (5.0.0.alpha.2) supports Swift 4.2, but with a couple of known issues:
+
+When using the new build system and using R.swift as a build step:
+ - The initial compile will fail if no output file is configured
+ - However, when setting an output file, subsequent incremental build won't run the R.swift build step
+
+Current known work-arounds for these issues:
+ 1. Use the Legacy Build System
+ 2. Don't configure an output file, but compile twice (difficult on a CI)
+ 3. Configure an output file, but always do a clean build when an asset has been added (difficult to remember when developing)
+ 4. Commit the R.generated.swift file to source control, so the CI has the lastest version from development 
+
+We're working on finding a better solution to these issues, see also: https://github.com/mac-cain13/R.swift/issues/456
+
+---
 
 ## Why use this?
 
@@ -65,6 +84,7 @@ R.swift currently supports these types of resources:
 
 Runtime validation with [`R.validate()`](Documentation/Examples.md#runtime-validation):
 - If all images used in storyboards and nibs are available
+- If all named colors used in storyboards and nibs are available
 - If all view controllers with storyboard identifiers can be loaded
 - If all custom fonts can be loaded
 
@@ -85,7 +105,7 @@ Runtime validation with [`R.validate()`](Documentation/Examples.md#runtime-valid
 
 [CocoaPods](http://cocoapods.org) is the recommended way of installation, as this avoids including any binary files into your project.
 
-_Note on Carthage: R.swift is a tool that used in a build step, it is not a dynamic library. Therefore [it is not possible](https://github.com/mac-cain13/R.swift/issues/42) to install it with Carthage._
+_Note on Carthage: R.swift is a tool used in a build step, it is not a dynamic library. Therefore [it is not possible](https://github.com/mac-cain13/R.swift/issues/42) to install it with Carthage._
 
 > ### ⚠️ Change between R.swift 3 and R.swift 4
 > Be aware:  
@@ -121,7 +141,7 @@ _Tip:_ Add the `*.generated.swift` pattern to your `.gitignore` file to prevent 
 
 ### Building from source
 
-R.swift is build using [Swift Package Manager (SPM)](https://github.com/apple/swift-package-manager).
+R.swift is built using [Swift Package Manager (SPM)](https://github.com/apple/swift-package-manager).
 
 1. Check out the code
 2. Run `swift build -c release -Xswiftc -static-stdlib` from the root directory
