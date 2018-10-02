@@ -1,28 +1,27 @@
 PODS:
-  - R.swift.Library (5.0.0.alpha.1)
+  - R.swift (5.0.0.alpha.2):
+    - R.swift.Library (~> 5.0.0.alpha.2)
+  - R.swift.Library (5.0.0.alpha.2)
   - SWRevealViewController (2.3.0)
 
 DEPENDENCIES:
-  - "R.swift.Library (from `git@github.com:mac-cain13/R.swift.Library.git`)"
+  - R.swift (from `.`)
   - SWRevealViewController
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - R.swift.Library
     - SWRevealViewController
 
 EXTERNAL SOURCES:
-  R.swift.Library:
-    :git: "git@github.com:mac-cain13/R.swift.Library.git"
-
-CHECKOUT OPTIONS:
-  R.swift.Library:
-    :commit: b6d4ccb5042f933b9b7acb2fb1d424f93512033e
-    :git: "git@github.com:mac-cain13/R.swift.Library.git"
+  R.swift:
+    :path: "."
 
 SPEC CHECKSUMS:
-  R.swift.Library: 50421682fe36726a830ad2b727c5362b8959cc1e
+  R.swift: c591fa10c873cc31b4d56c95d4e52f1850a295a8
+  R.swift.Library: 3c21b823839bf5a6769dc7f96cb44479dab51b1b
   SWRevealViewController: 6d3fd97f70112fd7cef9de14df4260eacce4c63a
 
-PODFILE CHECKSUM: 60ef58c3328649cce6ac12481f40d26d722e5079
+PODFILE CHECKSUM: 7b593fd7585ba524a33f5ca52e8085013a4570ac
 
 COCOAPODS: 1.5.3
