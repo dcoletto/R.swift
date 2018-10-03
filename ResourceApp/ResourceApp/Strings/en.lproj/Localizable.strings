@@ -1,3 +1,4 @@
-"random_str"="A random string";
-"from_xml"="This is a string from Localizable.strings.xml";
+"from_xml"="This is a string from Localizable.xml";
 "random_str_two"="Another random string";
+"random_str"="A random string";
+"we made it"="We made it maddafakka";

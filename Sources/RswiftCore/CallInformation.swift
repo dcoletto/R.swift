@@ -11,8 +11,6 @@ import Foundation
 import XcodeEdit
 
 public struct CallInformation {
-  static let tmpStringFileName = ".tmp_rswift.strings"
-    
   let outputURL: URL
   let rswiftIgnoreURL: URL
 

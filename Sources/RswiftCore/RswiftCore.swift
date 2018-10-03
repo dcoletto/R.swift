@@ -22,7 +22,7 @@ public struct RswiftCore {
         .compactMap { $0 }
         .filter { !ignoreFile.matches(url: $0) }
 
-      let resources = Resources(resourceURLs: resourceURLs, fileManager: FileManager.default)
+      let resources = try Resources(resourceURLs: resourceURLs, fileManager: FileManager.default)
                 
       let generators: [StructGenerator] = [
         ImageStructGenerator(assetFolders: resources.assetFolders, images: resources.images),
