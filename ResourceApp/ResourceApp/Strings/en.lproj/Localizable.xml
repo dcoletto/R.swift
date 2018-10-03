@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="from_xml">This is a string from Localizable.strings.xml</string>
   <string name="random_str">A random string</string>
   <string name="random_str_two">Another random string</string>
 </resources>

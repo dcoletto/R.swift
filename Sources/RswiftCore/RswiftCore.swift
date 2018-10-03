@@ -23,7 +23,7 @@ public struct RswiftCore {
         .filter { !ignoreFile.matches(url: $0) }
 
       let resources = Resources(resourceURLs: resourceURLs, fileManager: FileManager.default)
-
+                
       let generators: [StructGenerator] = [
         ImageStructGenerator(assetFolders: resources.assetFolders, images: resources.images),
         ColorStructGenerator(assetFolders: resources.assetFolders),

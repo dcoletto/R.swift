@@ -11,7 +11,16 @@ import Foundation
 import SWXMLHash
 
 struct LocalizableStrings : WhiteListedExtensionsResourceType {
-  static let supportedExtensions: Set<String> = ["strings", "stringsdict"]
+  static let supportedExtensions: Set<String> = ["strings", "stringsdict", "xml"]
+    
+  static let xmlParser = SWXMLHash.config { config in
+        config.shouldProcessLazily = false
+        config.shouldProcessNamespaces = false
+        config.caseInsensitive = false
+        config.encoding = String.Encoding.utf8
+        config.userInfo = [:]
+        config.detectParsingErrors = true
+    }
 
   let filename: String
   let locale: Locale
@@ -32,77 +41,34 @@ struct LocalizableStrings : WhiteListedExtensionsResourceType {
 
     // Get locale from url (second to last component)
     let locale = Locale(url: url)
-
-    // Check to make sure url can be parsed as a dictionary
-    print("URL: \(url)")
-    // If the url is a Localizable try to parse it as XML
+    
     let nsDictionary: NSDictionary
-    if url.absoluteString.hasSuffix(".lproj/Localizable.strings") {
-        let xmlParser = SWXMLHash.config { config in
-            /*
-             * shouldProcessLazily
-               This determines whether not to use lazy loading of the XML. It can significantly increase the performance of parsing if your XML is large.
-               Defaults to false
-             
-             * shouldProcessNamespaces
-               This setting is forwarded on to the internal NSXMLParser instance. It will return any XML elements without their namespace parts (i.e. "<h:table>" will be returned as "<table>")
-               Defaults to false
-             
-             * caseInsensitive
-               This setting allows for key lookups to be case insensitive. Typically XML is a case sensitive language, but this option lets you bypass this if necessary.
-               Defaults to false
-             
-             * encoding
-               This setting allows for explicitly specifying the character encoding when an XML string is passed to parse.
-               Defaults to String.encoding.utf8
-             
-             * userInfo
-               This setting mimics Codable's userInfo property to allow the user to add contextual information that will be used for deserialization.
-               See Codable's userInfo docs
-               The default is [:]
-             
-             * detectParsingErrors
-               This setting attempts to detect XML parsing errors. parse will return an XMLIndexer.parsingError if any parsing issues are found.
-               Defaults to false (because of backwards compatibility and because many users attempt to parse HTML with this library)
-             */
-            config.shouldProcessLazily = false
-            config.shouldProcessNamespaces = false
-            config.caseInsensitive = false
-            config.encoding = String.Encoding.utf8
-            config.userInfo = [:]
-            config.detectParsingErrors = true
+    if url.pathExtension == "xml" {
+        guard let dict = try? xmlToNsDict(url: url) else {
+            throw ResourceParsingError.parsingFailed("Conversion to NSDictionary failed from URL: \(url.absoluteString)")
         }
-        let fileContent = try String(contentsOf: URL(string: "\(url.absoluteString).xml")!)
-
-        let parsed = xmlParser.parse(fileContent)
-        parsed["resources"]["string"].all.forEach {
-            print("\($0.element!.attribute(by: "name")!.text) -> \($0.element!.text)")
-        }
-        
-        nsDictionary = Dictionary(uniqueKeysWithValues:
-            parsed["resources"]["string"].all.map {
-                ($0.element!.attribute(by: "name")!.text, $0.element!.text)
-            }
-        ) as NSDictionary
+        nsDictionary = dict
     } else {
         guard let dict = NSDictionary(contentsOf: url) else {
             throw ResourceParsingError.parsingFailed("Filename and/or extension could not be parsed from URL: \(url.absoluteString)")
         }
         nsDictionary = dict
     }
-    
-    print("======== DICT =========")
-    print(nsDictionary)
 
     // Parse dicts from NSDictionary
     let dictionary: [String : (params: [StringParam], commentValue: String)]
     switch url.pathExtension {
     case "strings":
-      dictionary = try parseStrings(nsDictionary, source: locale.withFilename("\(filename).strings"))
+        dictionary = try parseStrings(nsDictionary, source: locale.withFilename("\(filename).strings"))
     case "stringsdict":
-      dictionary = try parseStringsdict(nsDictionary, source: locale.withFilename("\(filename).stringsdict"))
+        dictionary = try parseStringsdict(nsDictionary, source: locale.withFilename("\(filename).stringsdict"))
+    case "xml":
+        dictionary = try parseStrings(nsDictionary, source: locale.withFilename("\(filename).xml"))
+        let urlPath = url.deletingLastPathComponent()
+        let tmpUrl = URL(string: "\(urlPath)\(CallInformation.tmpStringFileName)")!
+        try dictToFile(url: tmpUrl, nsDict: nsDictionary)
     default:
-      throw ResourceParsingError.unsupportedExtension(givenExtension: url.pathExtension, supportedExtensions: LocalizableStrings.supportedExtensions)
+        throw ResourceParsingError.unsupportedExtension(givenExtension: url.pathExtension, supportedExtensions: LocalizableStrings.supportedExtensions)
     }
 
     self.filename = filename
@@ -111,35 +77,57 @@ struct LocalizableStrings : WhiteListedExtensionsResourceType {
   }
 }
 
+private func dictToFile(url: URL, nsDict: NSDictionary) throws {
+    var result = ""
+    nsDict.forEach {
+        result += "\"\($0.key)\"=\"\($0.value)\";\n"
+    }
+    try result.append(to: url)
+    
+}
+
+private func xmlToNsDict(url: URL) throws -> NSDictionary {
+    
+    let fileContent = try String(contentsOf: url)
+    
+    let parsed = LocalizableStrings.xmlParser.parse(fileContent)
+    
+    return Dictionary(uniqueKeysWithValues:
+        parsed["resources"]["string"].all.map {
+            ($0.element!.attribute(by: "name")!.text, $0.element!.text)
+        }) as NSDictionary
+}
+
 private func parseStrings(_ nsDictionary: NSDictionary, source: String) throws -> [String : (params: [StringParam], commentValue: String)] {
-  var dictionary: [String : (params: [StringParam], commentValue: String)] = [:]
-
-  for (key, obj) in nsDictionary {
-    if let
-      key = key as? String,
-      let val = obj as? String
-    {
-      var params: [StringParam] = []
-
-      for part in FormatPart.formatParts(formatString: val) {
-        switch part {
-        case .reference:
-          throw ResourceParsingError.parsingFailed("Non-specifier reference in \(source): \(key) = \(val)")
-
-        case .spec(let formatSpecifier):
-          params.append(StringParam(name: nil, spec: formatSpecifier))
+    
+    var dictionary: [String : (params: [StringParam], commentValue: String)] = [:]
+    
+    for (key, obj) in nsDictionary {
+        if let
+            key = key as? String,
+            let val = obj as? String
+        {
+            var params: [StringParam] = []
+            
+            for part in FormatPart.formatParts(formatString: val) {
+                switch part {
+                case .reference:
+                    throw ResourceParsingError.parsingFailed("Non-specifier reference in \(source): \(key) = \(val)")
+                    
+                case .spec(let formatSpecifier):
+                    params.append(StringParam(name: nil, spec: formatSpecifier))
+                }
+            }
+            
+            
+            dictionary[key] = (params, val)
         }
-      }
-
-
-      dictionary[key] = (params, val)
+        else {
+            throw ResourceParsingError.parsingFailed("Non-string value in \(source): \(key) = \(obj)")
+        }
     }
-    else {
-      throw ResourceParsingError.parsingFailed("Non-string value in \(source): \(key) = \(obj)")
-    }
-  }
-
-  return dictionary
+    
+    return dictionary
 }
 
 private func parseStringsdict(_ nsDictionary: NSDictionary, source: String) throws -> [String : (params: [StringParam], commentValue: String)] {
@@ -239,4 +227,39 @@ func lookup(key: String, in dict: [String: AnyObject], processedReferences: [Str
   }
 
   return results
+}
+
+extension String {
+    func append(to url: URL) throws {
+        let data = self.data(using: .utf8, allowLossyConversion: false)!
+        do {
+            try data.append(to: url)
+        } catch {
+            throw ResourceParsingError.parsingFailed("Error writing to file: \(error)")
+        }
+    }
+}
+
+extension Data {
+    func append(to url: URL) throws {
+        let fm = FileManager.default
+        if !fm.fileExists(atPath: url.path) {
+            let result = fm.createFile(atPath: url.path, contents: self)
+            if !result {
+                throw ResourceParsingError.parsingFailed("Error while creating file!")
+            }
+            //try write(to: url)
+        } else {
+            if let fileHandle = try? FileHandle(forWritingTo: url) {
+                defer {
+                    fileHandle.closeFile()
+                }
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(self)
+            }
+            else {
+                try write(to: url)
+            }
+        }
+    }
 }

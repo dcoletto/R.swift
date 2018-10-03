@@ -32,10 +32,57 @@ struct Resources {
     nibs = resourceURLs.compactMap { url in tryResourceParsing { try Nib(url: url) } }
     storyboards = resourceURLs.compactMap { url in tryResourceParsing { try Storyboard(url: url) } }
     resourceFiles = resourceURLs.compactMap { url in tryResourceParsing { try ResourceFile(url: url) } }
-    reusables = (nibs.map { $0 as ReusableContainer } + storyboards.map { $0 as ReusableContainer })
-      .flatMap { $0.reusables }
+    reusables = (nibs.map { $0 as ReusableContainer } + storyboards.map { $0 as ReusableContainer }).flatMap { $0.reusables }
+    
+    let xmlUrls = resourceURLs.filter { $0.pathExtension == "xml" }
+    clearLocalizableFile(xmlUrls: xmlUrls, fm: fileManager)
+    
     localizableStrings = resourceURLs.compactMap { url in tryResourceParsing { try LocalizableStrings(url: url) } }
+    tmpToLocalizableFile(xmlUrls: xmlUrls, fm: fileManager)
   }
+}
+
+private func clearLocalizableFile(xmlUrls: [URL], fm: FileManager) {
+    xmlUrls.forEach { xmlUrl in
+        let tmpPath = xmlUrl.deletingLastPathComponent()
+        let tmpFileUrl = URL(string: "\(tmpPath)\(CallInformation.tmpStringFileName)")!
+        if fm.fileExists(atPath: tmpFileUrl.path) {
+            do {
+                try fm.removeItem(atPath: tmpFileUrl.path)
+            } catch {
+                print("Error removing [tmp] file \(tmpFileUrl.path)")
+            }
+        }
+        let strFileUrl = URL(string: "\(tmpPath)Localizable.strings")!
+        if fm.fileExists(atPath: strFileUrl.path) {
+            do {
+                print("Removing")
+                try fm.removeItem(atPath: strFileUrl.path)
+            } catch {
+                print("Error removing [strings] file \(strFileUrl.path)")
+            }
+        }
+    }
+}
+
+private func tmpToLocalizableFile(xmlUrls: [URL], fm: FileManager) {
+    xmlUrls.forEach { xmlUrl in
+        let tmpPath = xmlUrl.deletingLastPathComponent()
+        let tmpFileUrl = URL(string: "\(tmpPath)\(CallInformation.tmpStringFileName)")!
+        let localizableFileUrl = URL(string: "\(tmpPath)Localizable.strings")!
+        do {
+            print("===== .tmp.strings -> Localizable.strings =====")
+            // Read from .tmp.strings
+            let content = try Data(contentsOf: tmpFileUrl)
+            // write to Localizable.strings
+            let result = fm.createFile(atPath: localizableFileUrl.path, contents: content)
+            if !result {
+                print("Error creating file \(localizableFileUrl)")
+            }
+        } catch {
+            print("Error reading content from file \(xmlUrl)")
+        }
+    }
 }
 
 private func tryResourceParsing<T>(_ parse: () throws -> T) -> T? {
